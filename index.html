@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORESHEK</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #fff;
+    color: #202124;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .home {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px 60px;
+  }
+
+  .logo {
+    font-size: 72px;
+    font-weight: bold;
+    letter-spacing: -3px;
+    margin-bottom: 28px;
+    user-select: none;
+  }
+
+  .logo span:nth-child(1) { color: #4285F4; }
+  .logo span:nth-child(2) { color: #EA4335; }
+  .logo span:nth-child(3) { color: #FBBC05; }
+  .logo span:nth-child(4) { color: #4285F4; }
+  .logo span:nth-child(5) { color: #34A853; }
+  .logo span:nth-child(6) { color: #EA4335; }
+  .logo span:nth-child(7) { color: #FBBC05; }
+
+  .search-wrap {
+    width: 100%;
+    max-width: 580px;
+    position: relative;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    padding: 10px 20px;
+    transition: box-shadow 0.2s;
+    cursor: pointer;
+    background: #fff;
+  }
+
+  .search-box:hover,
+  .search-box.active {
+    box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+    border-color: rgba(223,225,229,0);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    padding: 6px 10px;
+    background: transparent;
+    color: #202124;
+    cursor: pointer;
+    caret-color: transparent;
+    pointer-events: none;
+  }
+
+  .search-box svg { width: 20px; height: 20px; fill: #9aa0a6; flex-shrink: 0; }
+
+  .suggestions {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #dfe1e5;
+    border-top: none;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: 0 4px 6px rgba(32,33,36,0.28);
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  .suggestions.show { display: block; }
+
+  .suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .suggestion-item:hover { background: #f8f9fa; }
+  .suggestion-item svg { width: 18px; height: 18px; fill: #9aa0a6; }
+
+  .buttons {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .buttons button {
+    background: #f8f9fa;
+    border: 1px solid #f8f9fa;
+    border-radius: 4px;
+    color: #3c4043;
+    font-size: 14px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .buttons button:hover {
+    border-color: #dadce0;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  }
+
+  .ads {
+    width: 100%;
+    max-width: 1000px;
+    margin: 40px auto 0;
+    border-top: 1px solid #eee;
+    padding: 20px 16px 60px;
+  }
+
+  .ads-label {
+    font-size: 12px;
+    color: #70757a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .ads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .ad-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+  }
+
+  .ad-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  }
+
+  .ad-thumb {
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .thumb-1 { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); }
+  .thumb-1 .moon {
+    position: absolute; top: 18px; right: 22px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #e6e6e6; box-shadow: 0 0 18px #cfcfcf;
+  }
+  .thumb-1 .grave {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 70px;
+    background: #4a4a5a;
+    border-radius: 30px 30px 0 0;
+  }
+  .thumb-1 .cross::before,
+  .thumb-1 .cross::after {
+    content: ""; position: absolute; background: #b0b0b8;
+  }
+  .thumb-1 .cross::before {
+    width: 6px; height: 30px; left: 50%; top: 20px; transform: translateX(-50%);
+  }
+  .thumb-1 .cross::after {
+    width: 22px; height: 6px; left: 50%; top: 30px; transform: translateX(-50%);
+  }
+
+  .thumb-2 { background: linear-gradient(180deg, #fdf6e3 0%, #f5e6c8 100%); }
+  .thumb-2 .dumpling {
+    position: absolute;
+    width: 46px; height: 34px;
+    background: #f2d9a0;
+    border-radius: 50% 50% 40% 40%;
+    box-shadow: inset -4px -4px 8px rgba(0,0,0,0.1);
+  }
+  .thumb-2 .d1 { top: 30px; left: 30px; }
+  .thumb-2 .d2 { top: 55px; left: 80px; }
+  .thumb-2 .d3 { top: 35px; right: 40px; }
+  .thumb-2 .num4 {
+    position: absolute; bottom: 8px; right: 20px;
+    font-size: 40px; font-weight: bold; color: #d9534f;
+    font-family: Georgia, serif;
+  }
+
+  .thumb-3 { background: linear-gradient(180deg, #fff1e6 0%, #ffd9c0 100%); }
+  .thumb-3 .hat {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    width: 70px; height: 45px;
+    background: #fff;
+    border-radius: 35px 35px 8px 8px;
+    border: 2px solid #eee;
+  }
+  .thumb-3 .face {
+    position: absolute; top: 65px; left: 50%; transform: translateX(-50%);
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #f4c7a1;
+  }
+  .thumb-3 .eye {
+    position: absolute; top: 88px; width: 8px; height: 8px;
+    border-radius: 50%; background: #333;
+  }
+  .thumb-3 .eye.l { left: calc(50% - 14px); }
+  .thumb-3 .eye.r { left: calc(50% + 6px); }
+  .thumb-3 .dumpling-small {
+    position: absolute; bottom: 12px; right: 25px;
+    width: 34px; height: 24px;
+    background: #f2d9a0; border-radius: 50% 50% 40% 40%;
+  }
+
+  .thumb-4 { background: linear-gradient(180deg, #e8f0fe 0%, #d2e3fc 100%); }
+  .thumb-4 .robot {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    width: 70px; height: 70px;
+    background: #5f8dd3;
+    border-radius: 12px;
+    border: 3px solid #3b6cb5;
+  }
+  .thumb-4 .robot::before {
+    content: ""; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 14px; background: #3b6cb5;
+  }
+  .thumb-4 .robot::after {
+    content: ""; position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+    width: 10px; height: 10px; border-radius: 50%; background: #EA4335;
+  }
+  .thumb-4 .r-eye {
+    position: absolute; top: 55px; width: 10px; height: 10px;
+    border-radius: 50%; background: #fff;
+  }
+  .thumb-4 .r-eye.l { left: calc(50% - 18px); }
+  .thumb-4 .r-eye.r { left: calc(50% + 8px); }
+  .thumb-4 .human {
+    position: absolute; bottom: 10px; left: 25px;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #f4c7a1; border: 2px solid #d9a97e;
+  }
+
+  .thumb-5 { background: linear-gradient(180deg, #2b1055 0%, #7597de 100%); }
+  .thumb-5 .coin {
+    position: absolute; top: 30px; left: 30px;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffe680, #d4a017);
+    box-shadow: 0 0 12px rgba(255,215,0,0.5);
+  }
+  .thumb-5 .coin::after {
+    content: "₽"; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #8a6300; font-weight: bold; font-size: 24px;
+  }
+  .thumb-5 .question {
+    position: absolute; bottom: 14px; right: 22px;
+    font-size: 46px; font-weight: bold; color: #fff;
+    font-family: Georgia, serif;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .thumb-6 { background: linear-gradient(180deg, #3a3a3a 0%, #1f1f1f 100%); }
+  .thumb-6 .rat-body {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    width: 80px; height: 44px;
+    background: #6b6b6b;
+    border-radius: 50% 60% 50% 50%;
+  }
+  .thumb-6 .rat-head {
+    position: absolute; bottom: 42px; left: calc(50% + 18px);
+    width: 34px; height: 30px;
+    background: #7a7a7a;
+    border-radius: 50% 50% 40% 60%;
+  }
+  .thumb-6 .rat-ear {
+    position: absolute; bottom: 62px; left: calc(50% + 30px);
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #8a8a8a;
+    border: 2px solid #5a5a5a;
+  }
+  .thumb-6 .rat-eye {
+    position: absolute; bottom: 55px; left: calc(50% + 30px);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #ff4d4d;
+    box-shadow: 0 0 6px #ff4d4d;
+  }
+  .thumb-6 .rat-tail {
+    position: absolute; bottom: 34px; left: calc(50% - 60px);
+    width: 50px; height: 4px;
+    background: #8a8a8a;
+    border-radius: 4px;
+    transform: rotate(-15deg);
+  }
+
+  .ad-body { padding: 10px 12px; }
+  .ad-title { font-size: 14px; font-weight: bold; color: #202124; margin-bottom: 4px; }
+  .ad-desc { font-size: 12px; color: #5f6368; line-height: 1.35; }
+
+  .signature {
+    text-align: center;
+    font-size: 11px;
+    color: #b0b0b0;
+    letter-spacing: 1px;
+    padding: 0 16px 18px;
+    user-select: none;
+  }
+
+  .answer-page {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .answer-page.show { display: flex; }
+
+  .answer-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 30px 0;
+    border-bottom: 1px solid #ebebeb;
+    flex-wrap: wrap;
+  }
+
+  .back-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    margin-bottom: 14px;
+  }
+
+  .back-btn:hover { background: #f1f3f4; }
+
+  .back-btn svg { width: 22px; height: 22px; fill: #5f6368; }
+
+  .answer-header .logo {
+    font-size: 30px;
+    letter-spacing: -1.5px;
+    margin-bottom: 14px;
+  }
+
+  .answer-searchbar {
+    flex: 1;
+    min-width: 240px;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    padding: 8px 18px;
+    box-shadow: 0 1px 6px rgba(32,33,36,0.15);
+    margin-bottom: 14px;
+  }
+
+  .answer-searchbar input {
+    flex: 1; border: none; outline: none;
+    font-size: 15px; padding: 4px 8px;
+    background: transparent;
+  }
+
+  .answer-searchbar svg { width: 18px; height: 18px; fill: #9aa0a6; }
+
+  .answer-tabs {
+    display: flex;
+    gap: 24px;
+    padding: 0 30px;
+    font-size: 14px;
+    color: #5f6368;
+  }
+
+  .answer-tabs .tab {
+    padding: 10px 4px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+
+  .answer-tabs .tab.active {
+    color: #1a73e8;
+    border-bottom-color: #1a73e8;
+  }
+
+  .answer-body {
+    padding: 24px 30px 60px;
+    max-width: 760px;
+  }
+
+  .ai-block {
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 20px 22px;
+    background: #f8f9fa;
+    margin-bottom: 28px;
+  }
+
+  .ai-block-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: #5f6368;
+  }
+
+  .ai-block-header .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #4285F4;
+    box-shadow: 0 0 0 4px rgba(66,133,244,0.15);
+  }
+
+  .ai-block-header .label {
+    font-weight: bold;
+    color: #202124;
+  }
+
+  .ai-answer {
+    font-size: 15px;
+    line-height: 1.65;
+    color: #202124;
+  }
+
+  .ai-answer p { margin-bottom: 14px; }
+  .ai-answer p:last-child { margin-bottom: 0; }
+
+  .answer-more {
+    font-size: 14px;
+    color: #70757a;
+    margin-bottom: 12px;
+  }
+
+  .answer-more .link {
+    color: #1a0dab;
+    cursor: pointer;
+  }
+
+  .answer-more .link:hover { text-decoration: underline; }
+
+  .news-tab-content { display: none; }
+  .news-tab-content.show { display: block; }
+
+  .news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 8px;
+  }
+
+  .news-item {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #ebebeb;
+    cursor: pointer;
+  }
+
+  .news-item:last-child { border-bottom: none; }
+
+  .news-thumb {
+    width: 120px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .news-text { flex: 1; min-width: 0; }
+
+  .news-source {
+    font-size: 12px;
+    color: #70757a;
+    margin-bottom: 4px;
+  }
+
+  .news-headline {
+    font-size: 17px;
+    color: #1a0dab;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .news-item:hover .news-headline { text-decoration: underline; }
+
+  .news-snippet {
+    font-size: 13px;
+    color: #4d5156;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 600px) {
+    .logo { font-size: 52px; margin-bottom: 22px; }
+    .search-box { padding: 8px 16px; }
+    .search-box input { font-size: 15px; }
+    .ads { padding: 16px 12px 40px; margin-top: 28px; }
+    .ads-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .ad-thumb { height: 110px; }
+    .ad-title { font-size: 13px; }
+    .ad-desc { font-size: 11px; }
+
+    .answer-header { padding: 14px 16px 0; gap: 10px; }
+    .back-btn { width: 36px; height: 36px; margin-bottom: 12px; }
+    .back-btn svg { width: 20px; height: 20px; }
+    .answer-header .logo { font-size: 22px; margin-bottom: 12px; letter-spacing: -1px; }
+    .answer-tabs { padding: 0 16px; gap: 16px; font-size: 13px; }
+    .answer-body { padding: 18px 16px 40px; }
+    .ai-block { padding: 16px; border-radius: 12px; }
+    .ai-answer { font-size: 14px; }
+
+    .news-thumb { width: 90px; height: 70px; }
+    .news-headline { font-size: 15px; }
+    .news-snippet { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="home" id="homePage">
+    <div class="logo">
+      <span>O</span><span>R</span><span>E</span><span>S</span><span>H</span><span>E</span><span>K</span>
+    </div>
+
+    <div class="search-wrap">
+      <div class="search-box" id="searchBox">
+        <svg viewBox="0 0 24 24">
+          <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/>
+        </svg>
+        <input type="text" value="" readonly placeholder="">
+      </div>
+      <div class="suggestions" id="suggestions">
+        <div class="suggestion-item" id="bioSuggestion">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+          <span>bio</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="searchBtn">Поиск в ORESHEK</button>
+    </div>
+
+    <section class="ads">
+      <div class="ads-label">Реклама</div>
+      <div class="ads-grid">
+
+        <div class="ad-card">
+          <div class="ad-thumb thumb-1">
+            <div class="moon"></div>
+            <div class="grave"><div class="cross"></div></div>
+          </div>
+          <div class="ad-body">
+            <div class="ad-title">Trackov: трагичная смерть</div>
+            <div class="ad-desc">Хроника последнего дня. Как всё пошло не так.</div>
+          </div>
+        </div>
+
+        <div class="ad-card">
+          <div class="ad-thumb thumb-2">
+            <div class="dumpling d1"></div>
+            <div class="dumpling d2"></div>
+            <div class="dumpling d3"></div>
+            <div class="num4">4</div>
+          </div>
+          <div class="ad-body">
+            <div class="ad-title">Связь пельменей и четырки</div>
+            <div class="ad-desc">Сенсационное открытие: 4 пельменя — это не просто так.</div>
+          </div>
+        </div>
+
+        <div class="ad-card">
+          <div class="ad-thumb thumb-3">
+            <div class="hat"></div>
+            <div class="face"></div>
+            <div class="eye l"></div>
+            <div class="eye r"></div>
+            <div class="dumpling-small"></div>
+          </div>
+          <div class="ad-body">
+            <div class="ad-title">Шеф Илюха и его пельмень</div>
+            <div class="ad-desc">Рецепт, который перевернул кухню. Осторожно, горячо.</div>
+          </div>
+        </div>
+
+        <div class="ad-card">
+          <div class="ad-thumb thumb-4">
+            <div class="robot"></div>
+            <div class="r-eye l"></div>
+            <div class="r-eye r"></div>
+            <div class="human"></div>
+          </div>
+          <div class="ad-body">
+            <div class="ad-title">Translator — человек или робот?</div>
+            <div class="ad-desc">Расследование, которое зашло слишком далеко.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="signature">вайбкодфроммаерс</div>
+  </div>
+
+  <div class="answer-page" id="answerPage">
+    <div class="answer-header">
+      <div class="back-btn" id="backBtn" title="Назад">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </div>
+      <div class="logo">
+        <span>O</span><span>R</span><span>E</span><span>S</span><span>H</span><span>E</span><span>K</span>
+      </div>
+      <div class="answer-searchbar">
+        <input type="text" value="bio" readonly>
+        <svg viewBox="0 0 24 24">
+          <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="answer-tabs">
+      <div class="tab active" data-tab="all">Все</div>
+      <div class="tab" data-tab="news">Новости</div>
+    </div>
+
+    <div class="answer-body">
+
+      <div class="tab-content" id="tab-all">
+        <div class="ai-block">
+          <div class="ai-block-header">
+            <span class="dot"></span>
+            <span class="label">Ответ</span>
+            <span>по запросу «bio»</span>
+          </div>
+
+          <div class="ai-answer">
+            <p>Autletoreshek - my name is already 2 years old.</p>
+            <p>Just a part of my life that stays with me.</p>
+            <p>I m incredibly lucky with people around me.</p>
+            <p>I have best friends - those with whom you can laugh to tears, talk about everythink and just be yourself.</p>
+            <p>And there she is my most beautiful and perfect girlfriend.</p>
+            <p>A person with whom even ordinary moments become special.</p>
+          </div>
+        </div>
+
+        <div class="answer-more">
+          Показаны результаты по запросу <span class="link">bio</span>
+        </div>
+      </div>
+
+      <div class="tab-content news-tab-content" id="tab-news">
+        <div class="news-list">
+
+          <div class="news-item">
+            <div class="news-thumb ad-thumb thumb-1">
+              <div class="moon"></div>
+              <div class="grave"><div class="cross"></div></div>
+            </div>
+            <div class="news-text">
+              <div class="news-source">oreshek.news · 2 часа назад</div>
+              <div class="news-headline">Trackov: трагичная смерть</div>
+              <div class="news-snippet">Хроника последнего дня. Как всё пошло не так и что осталось после.</div>
+            </div>
+          </div>
+
+          <div class="news-item">
+            <div class="news-thumb ad-thumb thumb-2">
+              <div class="dumpling d1"></div>
+              <div class="dumpling d2"></div>
+              <div class="dumpling d3"></div>
+              <div class="num4">4</div>
+            </div>
+            <div class="news-text">
+              <div class="news-source">oreshek.news · 5 часов назад</div>
+              <div class="news-headline">Связь пельменей и четырки</div>
+              <div class="news-snippet">Сенсационное открытие: 4 пельменя — это не просто так. Учёные в шоке.</div>
+            </div>
+          </div>
+
+          <div class="news-item">
+            <div class="news-thumb ad-thumb thumb-3">
+              <div class="hat"></div>
+              <div class="face"></div>
+              <div class="eye l"></div>
+              <div class="eye r"></div>
+              <div class="dumpling-small"></div>
+            </div>
+            <div class="news-text">
+              <div class="news-source">oreshek.news · вчера</div>
+              <div class="news-headline">Шеф Илюха и его пельмень</div>
+              <div class="news-snippet">Рецепт, который перевернул кухню. Осторожно, горячо — но безумно вкусно.</div>
+            </div>
+          </div>
+
+          <div class="news-item">
+            <div class="news-thumb ad-thumb thumb-4">
+              <div class="robot"></div>
+              <div class="r-eye l"></div>
+              <div class="r-eye r"></div>
+              <div class="human"></div>
+            </div>
+            <div class="news-text">
+              <div class="news-source">oreshek.news · вчера</div>
+              <div class="news-headline">Translator — человек или робот?</div>
+              <div class="news-snippet">Расследование, которое зашло слишком далеко. Ответов пока нет.</div>
+            </div>
+          </div>
+
+          <div class="news-item">
+            <div class="news-thumb ad-thumb thumb-5">
+              <div class="coin"></div>
+              <div class="question">?</div>
+            </div>
+            <div class="news-text">
+              <div class="news-source">oreshek.news · сегодня</div>
+              <div class="news-headline">Репик или башляться — вот в чём вопрос</div>
+              <div class="news-snippet">Вечный спор, который не утихает. Каждый выбирает своё.</div>
+            </div>
+          </div>
+
+          <div class="news-item">
+            <div class="news-thumb ad-thumb thumb-6">
+              <div class="rat-tail"></div>
+              <div class="rat-body"></div>
+              <div class="rat-head"></div>
+              <div class="rat-ear"></div>
+              <div class="rat-eye"></div>
+            </div>
+            <div class="news-text">
+              <div class="news-source">oreshek.news · только что</div>
+              <div class="news-headline">Крыса — новый житель</div>
+              <div class="news-snippet">Поселилась неожиданно и уже стала местной знаменитостью.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  const searchBox = document.getElementById('searchBox');
+  const suggestions = document.getElementById('suggestions');
+  const searchBtn = document.getElementById('searchBtn');
+  const bioSuggestion = document.getElementById('bioSuggestion');
+  const homePage = document.getElementById('homePage');
+  const answerPage = document.getElementById('answerPage');
+  const backBtn = document.getElementById('backBtn');
+  const tabs = document.querySelectorAll('.answer-tabs .tab');
+  const tabAll = document.getElementById('tab-all');
+  const tabNews = document.getElementById('tab-news');
+
+  function openSuggestions() {
+    suggestions.classList.add('show');
+    searchBox.classList.add('active');
+  }
+
+  function closeSuggestions() {
+    suggestions.classList.remove('show');
+    searchBox.classList.remove('active');
+  }
+
+  searchBox.addEventListener('click', openSuggestions);
+  searchBtn.addEventListener('click', () => {
+    if (suggestions.classList.contains('show')) {
+      closeSuggestions();
+    } else {
+      openSuggestions();
+    }
+  });
+
+  bioSuggestion.addEventListener('click', (e) => {
+    e.stopPropagation();
+    homePage.style.display = 'none';
+    answerPage.classList.add('show');
+    window.scrollTo(0, 0);
+  });
+
+  backBtn.addEventListener('click', () => {
+    answerPage.classList.remove('show');
+    homePage.style.display = 'flex';
+    closeSuggestions();
+    window.scrollTo(0, 0);
+  });
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const target = tab.dataset.tab;
+      if (target === 'all') {
+        tabAll.style.display = 'block';
+        tabNews.classList.remove('show');
+      } else {
+        tabAll.style.display = 'none';
+        tabNews.classList.add('show');
+      }
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!searchBox.contains(e.target) && !suggestions.contains(e.target) && e.target !== searchBtn) {
+      closeSuggestions();
+    }
+  });
+</script>
+</body>
+</html>
